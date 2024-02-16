@@ -1,7 +1,17 @@
 {
   "scripts": {
     "dev": "wrangler dev src/index.ts",
-    "deploy": "wrangler deploy --minify src/index.ts"
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "lint:biome": "biome lint .",
+    "lint": "run-p lint:*",
+    "format:biome-import": "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched .",
+    "format:biome-apply-unsafe": "biome check --apply-unsafe --no-errors-on-unmatched .",
+    "format:biome-format": "biome format --write --no-errors-on-unmatched .",
+    "format:biome-apply": "biome lint --apply --no-errors-on-unmatched .",
+    "format": "run-s format:*",
+    "prepare": "husky",
+    "migration:dev": "wrangler d1 migrations apply --local hono_db",
+    "migration:prod": "wrangler d1 migrations apply hono_db"
   },
   "dependencies": {
     "hono": "^4.0.3"

@@ -6,15 +6,16 @@ compatibility_flags = [ "nodejs_compat" ]
 # [vars]
 # MY_VARIABLE = "production_value"
 
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+[[kv_namespaces]]
+binding = "KV"
+id = "c5e21051f3ab45a48e1ae82e5c6bfd44"
 
 # [[r2_buckets]]
 # binding = "MY_BUCKET"
 # bucket_name = "my-bucket"
 
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "my-database"
-# database_id = ""
+[[d1_databases]]
+binding = "DB"
+database_name = "hono_db"
+database_id = "8e1333e1-6deb-4e52-ba3f-90a2d8803e75"
+migrations_dir = "migrations"

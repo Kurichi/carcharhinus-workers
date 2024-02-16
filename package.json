@@ -1,23 +1,33 @@
 {
-  "scripts": {
-    "dev": "wrangler dev src/index.ts",
-    "deploy": "wrangler deploy --minify src/index.ts",
-    "lint:biome": "biome lint .",
-    "lint": "run-p lint:*",
-    "format:biome-import": "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched .",
-    "format:biome-apply-unsafe": "biome check --apply-unsafe --no-errors-on-unmatched .",
-    "format:biome-format": "biome format --write --no-errors-on-unmatched .",
-    "format:biome-apply": "biome lint --apply --no-errors-on-unmatched .",
-    "format": "run-s format:*",
-    "prepare": "husky",
-    "migration:dev": "wrangler d1 migrations apply --local hono_db",
-    "migration:prod": "wrangler d1 migrations apply hono_db"
-  },
-  "dependencies": {
-    "hono": "^4.0.3"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240208.0",
-    "wrangler": "^3.25.0"
-  }
+	"scripts": {
+		"dev": "wrangler dev src/index.ts",
+		"deploy": "wrangler deploy --minify src/index.ts",
+		"lint:biome": "biome lint .",
+		"lint": "run-p lint:*",
+		"format:biome-import": "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched .",
+		"format:biome-apply-unsafe": "biome check --apply-unsafe --no-errors-on-unmatched .",
+		"format:biome-format": "biome format --write --no-errors-on-unmatched .",
+		"format:biome-apply": "biome lint --apply --no-errors-on-unmatched .",
+		"format": "run-s format:*",
+		"prepare": "husky",
+		"migration:dev": "wrangler d1 migrations apply --local hono_db",
+		"migration:prod": "wrangler d1 migrations apply hono_db"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.29.3",
+		"hono": "^4.0.3",
+		"stripe": "^14.17.0",
+		"zod": "^3.22.4"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.5.3",
+		"@cloudflare/workers-types": "^4.20240208.0",
+		"@hono/sentry": "^1.0.1",
+		"husky": "^9.0.11",
+		"wrangler": "^3.28.2"
+	},
+	"volta": {
+		"node": "21.6.1",
+		"pnpm": "8.15.2"
+	}
 }

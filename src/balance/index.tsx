@@ -20,7 +20,7 @@ export const balance = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 const chargeSchema = zValidator(
 	"json",
 	z.object({
-		amount: z.number().min(100).max(100000),
+		amount: z.number().int().min(100).max(100000),
 	}),
 );
 

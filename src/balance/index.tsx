@@ -27,7 +27,8 @@ balance.post("/create-payment-intent", chargeSchema, async (c) => {
 	const { amount } = c.req.valid("json");
 
 	const payment = await CreatePaymentIntent(c, {
-		userId: c.var.userId,
+		// userId: c.var.userId,
+		userId: "test-user-id",
 		amount,
 	});
 
@@ -58,8 +59,9 @@ balance.get("/webhook", async (c) => {
 	// handle
 	switch (event.type) {
 		case "payment_intent.succeeded": {
-			const amount = event.data.object.amount;
+			// const amount = event.data.object.amount;
 			console.log("PaymentIntent was successful!");
+			console.log(event.data.object.customer);
 			break;
 		}
 		default:

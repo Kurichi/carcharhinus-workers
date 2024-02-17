@@ -1,8 +1,9 @@
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
 import Stripe from "stripe";
-import { balanceTransactions } from "../db/schema";
+import { balanceTransactions, userCustomer } from "../db/schema";
 import { BalanceTransaction, NewBalanceTransaction } from "./domain";
 
 type Config = {
@@ -58,13 +59,41 @@ export const CreatePaymentIntent = async (
 	c: Context,
 	input: CreatePaymentIntentInput,
 ): Promise<CreatePaymentIntentOutput> => {
-	let paymentIntent: Stripe.Response<Stripe.PaymentIntent>;
+	const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+	const db = drizzle(c.env.DB);
 
+	// Customerの取得
+	const uc = await db
+		.select()
+		.from(userCustomer)
+		.where(eq(userCustomer.userId, input.userId))
+		.get();
+
+	let customerId = uc?.customerId;
+
+	// Customerが存在しない場合，新規作成
+	if (!uc) {
+		const customer = await stripe.customers.create();
+		await db
+			.insert(userCustomer)
+			.values({
+				userId: input.userId,
+				customerId: customer.id,
+			})
+			.execute();
+		customerId = customer.id;
+	}
+
+	let paymentIntent: Stripe.Response<Stripe.PaymentIntent>;
 	try {
-		const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 		paymentIntent = await stripe.paymentIntents.create({
 			amount: input.amount,
 			currency: "jpy",
+			setup_future_usage: "off_session",
+			customer: customerId,
+			metadata: {
+				userId: input.userId,
+			},
 		});
 	} catch (error) {
 		throw new HTTPException(500, { message: "create payment intents failed" });

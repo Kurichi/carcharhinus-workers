@@ -15,6 +15,10 @@
 	},
 	"dependencies": {
 		"@hono/zod-validator": "^0.1.11",
+		"@microlabs/otel-cf-workers": "1.0.0-rc.15",
+		"@types/bcryptjs": "^2.4.6",
+		"bcryptjs": "^2.4.3",
+		"bcrypto": "^5.5.2",
 		"drizzle-orm": "^0.29.3",
 		"hono": "^4.0.3",
 		"stripe": "^14.17.0",

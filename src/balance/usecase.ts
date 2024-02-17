@@ -58,6 +58,8 @@ export const CreatePaymentIntent = async (
 	const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 	const db = drizzle(c.env.DB);
 
+	let flag = true;
+
 	// Customerの取得
 	const uc = await db
 		.select()
@@ -80,6 +82,7 @@ export const CreatePaymentIntent = async (
 			})
 			.execute();
 		customerId = customer.id;
+		flag = false;
 	}
 
 	const paymentMethods = await stripe.paymentMethods.list({
@@ -87,34 +90,55 @@ export const CreatePaymentIntent = async (
 		type: "card",
 	});
 
+	if (paymentMethods.data.length === 0) {
+		flag = false;
+	}
+
+	console.log(flag);
 	try {
+		// 支払いの自動化
+		if (flag) {
+			const paymentIntent = await stripe.paymentIntents.create({
+				amount: input.amount,
+				currency: "jpy",
+				payment_method: paymentMethods.data[0].id,
+				customer: customerId,
+				metadata: {
+					userId: input.userId,
+				},
+				off_session: true,
+				confirm: true,
+			});
+			return {
+				clientSecret: paymentIntent.client_secret ?? "",
+				automaticPayment: true,
+			};
+		}
+
+		// 支払いの自動化ができない場合
 		const paymentIntent = await stripe.paymentIntents.create({
 			amount: input.amount,
 			currency: "jpy",
-			setup_future_usage: "off_session",
-			payment_method: paymentMethods.data[0].id,
 			customer: customerId,
 			metadata: {
 				userId: input.userId,
 			},
-			off_session: true,
-			confirm: true,
 		});
 		return {
 			clientSecret: paymentIntent.client_secret ?? "",
-			automaticPayment: true,
+			automaticPayment: false,
 		};
 	} catch (e) {
-		if (e instanceof Stripe.errors.StripeError) {
-			const paymentIntents = await stripe.paymentIntents.retrieve(
-				//@ts-ignore
-				e.raw.payment_intent.id,
-			);
-			return {
-				clientSecret: paymentIntents.client_secret ?? "",
-				automaticPayment: false,
-			};
-		}
+		console.error(e);
+		// if (e instanceof Stripe.errors.StripeError) {
+		// 	const paymentIntents = await stripe.paymentIntents.retrieve(
+		// 		//@ts-ignore
+		// 		e.raw.payment_intent.id,
+		// 	);
+		// 	return {
+		// 		clientSecret: paymentIntents.client_secret ?? "",
+		// 		automaticPayment: false,
+		// 	};
 		throw new HTTPException(500, { message: "create payment intents failed" });
 	}
 };

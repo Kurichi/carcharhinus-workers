@@ -123,6 +123,7 @@ export const CreatePaymentIntent = async (
 			metadata: {
 				userId: input.userId,
 			},
+			setup_future_usage: "off_session",
 		});
 		return {
 			clientSecret: paymentIntent.client_secret ?? "",

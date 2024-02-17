@@ -1,5 +1,5 @@
 import { DrizzleD1Database } from "drizzle-orm/d1";
-import { omikuji, omikujiDraw } from "../../scripts/schema";
+import { omikuji, omikujiDraw } from "./../db/schema";
 import { FunctionResult } from "./model";
 
 export const getOmikujis = async (
@@ -20,7 +20,6 @@ export const getOmikujis = async (
 		const omikujis = await db.select().from(omikuji).orderBy(omikuji.id).all();
 		return { data: omikujis, error: null, status: 200 };
 	} catch (e) {
-		console.log(e);
 		if (e instanceof Error) {
 			return { data: null, error: e.message, status: 500 };
 		}
@@ -41,7 +40,6 @@ export const insertOmikujiDraw = async (
 		return { data: "success", error: null, status: 201 };
 	} catch (e) {
 		if (e instanceof Error) {
-			console.log(e);
 			return { data: null, error: e.message, status: 500 };
 		}
 		return { data: null, error: "internal server error", status: 500 };

@@ -47,6 +47,7 @@ export const MakeDeposit = async (
 
 export type CreatePaymentIntentInput = {
 	userId: string;
+	email: string;
 	amount: number;
 };
 
@@ -73,7 +74,9 @@ export const CreatePaymentIntent = async (
 
 	// Customerが存在しない場合，新規作成
 	if (!uc) {
-		const customer = await stripe.customers.create();
+		const customer = await stripe.customers.create({
+			email: input.email,
+		});
 		await db
 			.insert(userCustomer)
 			.values({

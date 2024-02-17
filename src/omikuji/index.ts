@@ -1,22 +1,23 @@
-import { trace } from "@opentelemetry/api";
-import { asc, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { omikuji } from "../../scripts/schema";
-import { MAX_PROBABILITY } from "./const";
-import { getOmikujis } from "./cruds";
+import { getOmikujis, insertOmikujiDraw } from "./cruds";
 import { decideOmikuji } from "./utils";
 
 type Bindings = {
 	DB: D1Database;
 };
 
-const app = new Hono<{
+type Variables = {
+	userId: string;
+};
+
+export const omikuji = new Hono<{
 	Bindings: Bindings;
+	Variables: Variables;
 }>();
 
-app.post("/draw", async (c) => {
+omikuji.post("/", async (c) => {
 	const db = drizzle(c.env.DB);
 	const { data, error, status } = await getOmikujis(db);
 	if (error !== null) {
@@ -33,8 +34,16 @@ app.post("/draw", async (c) => {
 			message: "Internal Server Error: id is null in decideOmikuji",
 		});
 	}
-	console.log(omikujiId);
+
+	const result = await insertOmikujiDraw(db, c.var.userId, omikujiId);
+	if (result.error !== null) {
+		throw new HTTPException(result.status, { message: result.error });
+	}
+	if (result.data !== "success") {
+		throw new HTTPException(500, {
+			message: "Internal Server Error: data is null in insertOmikujiDraw",
+		});
+	}
+
 	return c.json({ result: omikujiId }, 200);
 });
-
-export default app;

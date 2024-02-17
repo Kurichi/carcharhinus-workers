@@ -12,9 +12,10 @@ type Bindings = {
 
 type Variables = {
 	userId: string;
+	email: string;
 };
 
-const balance = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+export const balance = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 const chargeSchema = zValidator(
 	"json",
@@ -27,8 +28,8 @@ balance.post("/create-payment-intent", chargeSchema, async (c) => {
 	const { amount } = c.req.valid("json");
 
 	const payment = await CreatePaymentIntent(c, {
-		// userId: c.var.userId,
-		userId: "test-user-id",
+		userId: c.var.userId,
+		email: c.var.email,
 		amount,
 	});
 
@@ -60,13 +61,9 @@ balance.get("/webhook", async (c) => {
 	switch (event.type) {
 		case "payment_intent.succeeded": {
 			// const amount = event.data.object.amount;
-			console.log("PaymentIntent was successful!");
-			console.log(event.data.object.customer);
 			break;
 		}
 		default:
 			console.log(`Unhandled event type ${event.type}`);
 	}
 });
-
-export { balance };

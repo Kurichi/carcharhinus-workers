@@ -143,11 +143,8 @@ export const verify = async (token: string, secret: string, alg = "HS256") => {
 		throw new JwtTokenIssuedAt(now, payload.iat);
 	}
 	const signaturePart = tokenParts.slice(0, 2).join(".");
-	console.log("verify: signaturePart", signaturePart);
 	const signature = await signing(signaturePart, secret, alg);
-	console.log("verify:signature", signature);
 	const encodedSignature = encodeSignaturePart(signature);
-	console.log(encodedSignature, tokenParts[2]);
 	if (encodedSignature !== tokenParts[2]) {
 		throw new JwtTokenSignatureMismatched(token);
 	}

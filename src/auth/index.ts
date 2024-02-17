@@ -1,7 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
-import { checkPassword, decode, hashPassword, sign, verify } from "../libs/jwt";
+import { checkPassword, hashPassword, sign } from "../libs/jwt";
 import { TOKEN_EXPIRATION } from "./constant";
 import { createUser, getUser } from "./cruds";
 import { CreateUserInput, LoginUserInput } from "./model";
@@ -9,9 +9,10 @@ import { CreateUserInput, LoginUserInput } from "./model";
 export type AuthBinding = {
 	Bindings: { DB: D1Database; JWT_SECRET: string };
 };
-const app = new Hono<AuthBinding>();
 
-app.post("/signup", zValidator("json", CreateUserInput), async (c) => {
+export const auth = new Hono<AuthBinding>();
+
+auth.post("/signup", zValidator("json", CreateUserInput), async (c) => {
 	const req = c.req.valid("json");
 
 	const db = drizzle(c.env.DB);
@@ -29,7 +30,7 @@ app.post("/signup", zValidator("json", CreateUserInput), async (c) => {
 	return c.json({ error: res.error }, res.status);
 });
 
-app.post("/signin", zValidator("json", LoginUserInput), async (c) => {
+auth.post("/signin", zValidator("json", LoginUserInput), async (c) => {
 	const req = c.req.valid("json");
 	const db = drizzle(c.env.DB);
 
@@ -48,28 +49,9 @@ app.post("/signin", zValidator("json", LoginUserInput), async (c) => {
 	}
 	const payload = {
 		id: res.data.id,
+		email: res.data.email,
 		exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRATION,
 	};
 	const token = await sign(payload, c.env.JWT_SECRET);
 	return c.json({ jwt: token, user: res.data }, res.status);
 });
-
-app.get("/decode", (c) => {
-	const token = c.req.header("Authorization");
-	if (token === undefined) {
-		return c.json({ error: "No token" }, 400);
-	}
-	const decoded = decode(token);
-	return c.json({ data: decoded }, 200);
-});
-
-app.get("/verify", async (c) => {
-	const token = c.req.header("Authorization");
-	if (token === undefined) {
-		return c.json({ error: "No token" }, 400);
-	}
-	const decoded = await verify(token, c.env.JWT_SECRET);
-	return c.json({ data: decoded }, 200);
-});
-
-export default app;

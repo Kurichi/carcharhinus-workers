@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS  `omikuji` (
 	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` integer DEFAULT CURRENT_TIMESTAMP
 );
+-- INSERT INTO `omikuji` (`id`, `grade`, `probability`) VALUES ('1', '大吉', 5),('2', '中吉', 15),('3', '小吉', 30),('4', '吉', 30),('5', '凶', 15),('6', '大凶', 5);
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS  `omikuji_draw` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -23,6 +24,7 @@ CREATE TABLE IF NOT EXISTS  `omikuji_draw` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`omikuji_id`) REFERENCES `omikuji`(`id`) ON UPDATE no action ON DELETE no action
 );
+
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS `user_customer` (
 	`user_id` text PRIMARY KEY NOT NULL,

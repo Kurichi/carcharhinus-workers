@@ -1,6 +1,7 @@
 import { sentry } from "@hono/sentry";
 import { instrument } from "@microlabs/otel-cf-workers";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { auth } from "./auth";
 import { jwt } from "./auth/middleware";
 import { balance } from "./balance";
@@ -13,6 +14,12 @@ type Env = {
 };
 
 const app = new Hono<{ Bindings: Env }>();
+app.use(
+	"*",
+	cors({
+		origin: "*",
+	}),
+);
 app.route("/", auth);
 app.use("*", async (c, next) => {
 	const sentryMiddleware = sentry({

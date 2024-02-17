@@ -3,7 +3,9 @@ compatibility_date = "2023-12-01"
 account_id = "3c7f2cc039438babe6e28ae8cfede281"
 compatibility_flags = [ "nodejs_compat" ]
 
-# [vars]
+[vars]
+SENTRY_DNS = "https://fa944acfe5877c8df453059941dd2c50@o4506371921215488.ingest.sentry.io/4506734045167616"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51OjHYgLZHujxlce5k13HeMWtxeFoya9Xs87NLrU3r0eXgo2xiiYE70EYCew0BuAgMrJEpLkExxpioCfnCiNJ8bSP00Xqbxo51r"
 # MY_VARIABLE = "production_value"
 
 [[kv_namespaces]]

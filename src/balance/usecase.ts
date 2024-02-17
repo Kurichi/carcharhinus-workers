@@ -6,10 +6,6 @@ import Stripe from "stripe";
 import { balanceTransactions, userCustomer } from "../db/schema";
 import { BalanceTransaction, NewBalanceTransaction } from "./domain";
 
-type Config = {
-	Bindings: { DB: D1Database };
-};
-
 // ================
 // === 残高の追加 ===
 // ================
@@ -35,7 +31,6 @@ export const MakeDeposit = async (
 
 	const db = drizzle(c.env.DB);
 	await db.transaction(async (tx) => {
-		// TODO: 残高の更新
 		await tx.insert(balanceTransactions).values(transaction).execute();
 	});
 	return transaction;
@@ -53,7 +48,7 @@ export type CreatePaymentIntentInput = {
 
 export type CreatePaymentIntentOutput = {
 	clientSecret: string;
-	publishableKey: string;
+	automaticPayment: boolean;
 };
 
 export const CreatePaymentIntent = async (
@@ -87,27 +82,39 @@ export const CreatePaymentIntent = async (
 		customerId = customer.id;
 	}
 
-	let paymentIntent: Stripe.Response<Stripe.PaymentIntent>;
+	const paymentMethods = await stripe.paymentMethods.list({
+		customer: customerId,
+		type: "card",
+	});
+
 	try {
-		paymentIntent = await stripe.paymentIntents.create({
+		const paymentIntent = await stripe.paymentIntents.create({
 			amount: input.amount,
 			currency: "jpy",
 			setup_future_usage: "off_session",
+			payment_method: paymentMethods.data[0].id,
 			customer: customerId,
 			metadata: {
 				userId: input.userId,
 			},
+			off_session: true,
+			confirm: true,
 		});
-	} catch (error) {
+		return {
+			clientSecret: paymentIntent.client_secret ?? "",
+			automaticPayment: true,
+		};
+	} catch (e) {
+		if (e instanceof Stripe.errors.StripeError) {
+			const paymentIntents = await stripe.paymentIntents.retrieve(
+				//@ts-ignore
+				e.raw.payment_intent.id,
+			);
+			return {
+				clientSecret: paymentIntents.client_secret ?? "",
+				automaticPayment: false,
+			};
+		}
 		throw new HTTPException(500, { message: "create payment intents failed" });
 	}
-
-	if (!paymentIntent.client_secret) {
-		throw new HTTPException(500, { message: "no client secret" });
-	}
-
-	return {
-		clientSecret: paymentIntent.client_secret,
-		publishableKey: c.env.STRIPE_PUBLISHABLE_KEY,
-	};
 };

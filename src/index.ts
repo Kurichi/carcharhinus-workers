@@ -1,3 +1,4 @@
+import { sentry } from "@hono/sentry";
 import { instrument } from "@microlabs/otel-cf-workers";
 import { Hono } from "hono";
 import { auth } from "./auth";
@@ -8,10 +9,18 @@ import { config } from "./otel";
 
 type Env = {
 	JWT_SECRET: string;
+	SENTRY_DNS: string;
 };
 
 const app = new Hono<{ Bindings: Env }>();
 app.route("/", auth);
+app.use("*", async (c, next) => {
+	const sentryMiddleware = sentry({
+		dsn: c.env.SENTRY_DNS,
+		tracesSampleRate: 1.0,
+	});
+	return await sentryMiddleware(c, next);
+});
 
 const api = app.route("/api");
 api.use("*", (c, next) => {
@@ -23,3 +32,12 @@ api.route("/balance", balance);
 api.route("/omikuji", omikuji);
 
 export default instrument(app, config);
+
+type Bindings = {
+	KV: KVNamespace;
+	DB: D1Database;
+};
+
+type Variables = {
+	userId: string;
+};

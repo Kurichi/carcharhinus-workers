@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS  `omikuji` (
 	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` integer DEFAULT CURRENT_TIMESTAMP
 );
--- INSERT INTO `omikuji` (`id`, `grade`, `probability`) VALUES ('1', '大吉', 5),('2', '中吉', 15),('3', '小吉', 30),('4', '吉', 30),('5', '凶', 15),('6', '大凶', 5);
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS  `omikuji_draw` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -40,4 +39,4 @@ CREATE TABLE IF NOT EXISTS `users` (
 	`updated_at` integer DEFAULT CURRENT_TIMESTAMP
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);
+CREATE UNIQUE INDEX IF NOT EXISTS `users_email_unique` ON `users` (`email`);

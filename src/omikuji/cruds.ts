@@ -1,3 +1,4 @@
+import { desc, eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import { omikuji, omikujiDraw } from "./../db/schema";
 import { FunctionResult } from "./model";
@@ -38,6 +39,33 @@ export const insertOmikujiDraw = async (
 			.values({ user_id: userId, omikuji_id: omikujiId })
 			.execute();
 		return { data: "success", error: null, status: 201 };
+	} catch (e) {
+		if (e instanceof Error) {
+			return { data: null, error: e.message, status: 500 };
+		}
+		return { data: null, error: "internal server error", status: 500 };
+	}
+};
+
+export const getLatestDraw = async (
+	db: DrizzleD1Database,
+	userId: string,
+): Promise<FunctionResult<{ drawAt: Date | null; omikuji_id: string }>> => {
+	try {
+		const draw = await db
+			.select()
+			.from(omikujiDraw)
+			.where(eq(omikujiDraw.user_id, userId))
+			.orderBy(desc(omikujiDraw.created_at))
+			.get();
+		if (!draw) {
+			return { data: null, error: null, status: 200 };
+		}
+		return {
+			data: { drawAt: draw.created_at, omikuji_id: draw.omikuji_id },
+			error: null,
+			status: 200,
+		};
 	} catch (e) {
 		if (e instanceof Error) {
 			return { data: null, error: e.message, status: 500 };

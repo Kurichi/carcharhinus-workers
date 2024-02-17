@@ -1,9 +1,10 @@
 import { Hono } from "hono";
+import { balance } from "./balance";
 
-const app = new Hono();
-
-app.get("/", (c) => {
-	return c.text("Hello Hono!");
+const api = new Hono();
+api.use("*", (c, next) => {
+	return next();
 });
+api.route("/balance", balance);
 
-export default app;
+export default api;

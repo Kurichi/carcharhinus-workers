@@ -8,14 +8,14 @@ export const decideOmikuji = (
 		grade: string;
 		probability: number;
 	}[],
-): string | null => {
+): { id: string | null; display: string } => {
 	const ramdom = Math.floor(Math.random() * (MAX_PROBABILITY + 1));
 	let sum = 0;
 	for (const omikuji of omikujis) {
 		sum += omikuji.probability;
 		if (sum >= ramdom) {
-			return omikuji.id;
+			return { id: omikuji.id, display: omikuji.grade };
 		}
 	}
-	return null;
+	return { id: null, display: "error" };
 };

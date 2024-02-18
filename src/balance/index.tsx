@@ -66,4 +66,6 @@ balance.get("/webhook", async (c) => {
 		default:
 			console.log(`Unhandled event type ${event.type}`);
 	}
+
+	return c.text("ok", 200);
 });

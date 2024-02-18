@@ -50,6 +50,7 @@ auth.post("/signin", zValidator("json", LoginUserInput), async (c) => {
 	const payload = {
 		id: res.data.id,
 		email: res.data.email,
+		username: res.data.name,
 		exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRATION,
 	};
 	const token = await sign(payload, c.env.JWT_SECRET);
